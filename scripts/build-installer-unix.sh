@@ -135,16 +135,10 @@ pushd installers
                   then
                           echo "Uploading the installer package.."
                           export PATH=${BUILDKITE_BIN_PATH:-}:$PATH
-                          if [ -n "${UPLOAD_DIR_OVERRIDE:-}" ] ; then
-                            upload_dir="$UPLOAD_DIR_OVERRIDE"
-                            mv "$APP_NAME" "$upload_dir"
-                          else
-                            upload_dir="$APP_NAME"
-                          fi
-                          upload_artifacts_public "${upload_dir}/*"
+                          upload_artifacts_public "${APP_NAME}/*"
                           mv "launcher-config.yaml" "launcher-config-${cluster}.macos64.yaml"
                           upload_artifacts "launcher-config-${cluster}.macos64.yaml"
-                          rm -rf "$upload_dir"
+                          rm -rf "${APP_NAME}"
                   fi
           else
                   echo "Installer was not made."

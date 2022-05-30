@@ -30,5 +30,6 @@ mkDerivation {
     system-filepath temporary text turtle universum yaml
   ];
   description = "Daedalus Installer Builder";
+
   license = lib.licenses.asl20;
 }

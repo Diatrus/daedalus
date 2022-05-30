@@ -32,8 +32,6 @@ let
   };
   pkgs = import sources.nixpkgs { inherit system config; };
   sources = localLib.sources;
-  haskellNix = import sources."haskell.nix" {};
-  inherit (import haskellNix.sources.nixpkgs-unstable haskellNix.nixpkgsArgs) haskell-nix;
   flake-compat = import sources.flake-compat;
   walletFlake = flake-compat  { src = sources.cardano-wallet; };
   walletPackages = with walletFlake.defaultNix.hydraJobs; {
@@ -58,14 +56,13 @@ let
   ostable.x86_64-windows = "windows";
   ostable.x86_64-linux = "linux";
   ostable.x86_64-darwin = "macos64";
-  ostable.aarch64-darwin = "macos64-arm";
-
   packages = self: {
     inherit cluster pkgs version target nodeImplementation;
+    inherit (pkgs) hello cabal2nix;
     cardanoLib = localLib.iohkNix.cardanoLib;
     daedalus-bridge = self.bridgeTable.${nodeImplementation};
 
-    nodejs = pkgs.nodejs-16_x;
+    nodejs = pkgs.nodejs-14_x;
     nodePackages = pkgs.nodePackages.override { nodejs = self.nodejs; };
     yarnInfo = {
       version = "1.22.4";
@@ -319,11 +316,7 @@ let
     };
     rawapp-win64 = self.rawapp.override { win64 = true; };
     source = builtins.filterSource localLib.cleanSourceFilter ./.;
-    inherit ((haskell-nix.hackage-package { name = "yaml"; compiler-nix-name = "ghc8107"; cabalProject = ''
-      packages: .
-      package yaml
-        flags: -no-exe
-    ''; }).components.exes) yaml2json;
+    yaml2json = pkgs.haskell.lib.addExtraLibrary (pkgs.haskell.lib.disableCabalFlag pkgs.haskellPackages.yaml "no-exe") pkgs.haskellPackages.optparse-applicative;
 
     electron = pkgs.callPackage ./installers/nix/electron.nix {};
 
